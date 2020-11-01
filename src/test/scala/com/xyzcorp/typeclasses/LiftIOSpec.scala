@@ -1,4 +1,6 @@
 package com.xyzcorp.typeclasses
-class LiftIOSpec {
 
+import org.scalatest.{FunSpec, Matchers}
+
+class LiftIOSpec extends FunSpec with Matchers {
 }
