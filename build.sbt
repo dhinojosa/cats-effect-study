@@ -24,18 +24,19 @@ name := "cats-effect-study"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.6"
 
 scalacOptions ++= Seq(
-  //"-Ypartial-unification"
-  "-Xfatal-warnings"
-  ,"-feature"
-  ,"-deprecation"
+  "-Xfatal-warnings",
+  "-feature",
+  "-deprecation"
 )
 
 fork := true
 
 libraryDependencies := Seq(
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-  "org.typelevel" %% "cats-core" % "2.0.0" withSources() withJavadoc(),
-  "org.typelevel" %% "cats-effect" % "2.0.0" withSources() withJavadoc())
+  "org.scalatest" %% "scalatest" % "3.2.9" % "test",
+  "org.scalatest" %% "scalatest-funspec" % "3.2.9" % "test",
+  "org.typelevel" %% "cats-effect-testing-scalatest" % "1.3.0" % "test",
+  ("org.typelevel" %% "cats-effect" % "3.4.2").withSources().withJavadoc()
+)

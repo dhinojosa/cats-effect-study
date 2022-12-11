@@ -83,7 +83,7 @@ flycheck_*.el
 .history
 .lib/
 dist/*
-target/
+**/target/
 lib_managed/
 src_managed/
 project/boot/
@@ -158,3 +158,10 @@ Session.vim
 .netrwhist
 # auto-generated tag files
 tags
+
+
+**/.bloop
+.bloop/
+.bsp/
+.metals/
+.vscode/

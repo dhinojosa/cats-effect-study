@@ -1,38 +1,28 @@
 package com.xyzcorp.datatypes
 
 import cats._
+import cats.effect.testing.scalatest.AsyncIOSpec
+import cats.effect.{Clock, IO, SyncIO}
 import cats.implicits._
-import cats.effect.{Clock, Sync}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest._
+import org.scalatest.funspec.AsyncFunSpec
+import org.scalatest.matchers.should
+import org.scalatest.matchers.should._
 
-import scala.concurrent.duration.{MILLISECONDS, TimeUnit}
-class ClockSpec extends FunSpec with Matchers {
-
-  implicit val clock: Clock[Option] = new Clock[Option] {
-    override def realTime(unit: TimeUnit): Option[Long] = Option(System.currentTimeMillis())
-
-    override def monotonic(unit: TimeUnit): Option[Long] = Option(System.currentTimeMillis())
-  }
-
-  it("can be used for an F[_]?") {
+class ClockSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
+  it("can be used for an F[_] which is either IO, Sync, or Async") {
     def timeItem[F[_], A](x: A)(implicit ck: Clock[F], monad: Monad[F]) = {
       for {
-        x1 <- ck.monotonic(MILLISECONDS)
+        x1 <- ck.monotonic
         y2 <- monad.pure(x)
-        z3 <- ck.monotonic(MILLISECONDS)
+        z3 <- ck.monotonic
       } yield (y2, z3 - x1)
     }
 
-    timeItem[Option, Int](30) should be(Some(30, 3))
+    val result = timeItem[IO, Int](30)
+    result.asserting(t => t._1 should be(30))
+    result.asserting(t => t._2.length should be > 200L)
   }
 
-  it("is a datatype and not a type class to create timestamps") {
-    def displayTime[F[_]: Functor](implicit c: Clock[F], s: Sync[F], sh: Show[Long]): F[String] = {
-      for (
-        i <- c.monotonic(MILLISECONDS);
-        _ <- s.delay(0L);
-        j <- c.monotonic(MILLISECONDS)
-      ) yield sh.show(j - i)
-    }
-  }
+
 }

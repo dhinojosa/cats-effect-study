@@ -22,25 +22,26 @@
 
 package com.xyzcorp.datatypes
 
-import java.util.concurrent.Executors
+import cats.effect._
+import cats.effect.testing.scalatest.AsyncIOSpec
+import cats.kernel.Monoid
+import org.scalatest.funspec.AsyncFunSpec
+import org.scalatest.matchers.should.Matchers
 
-import cats.effect.IO
-import org.scalatest.{Assertion, FunSpec, Matchers}
-
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class IOSpec extends FunSpec with Matchers {
+class IOSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
   describe("IO Monad") {
-    it(""" captures an IO Effect, something
-        | that happens to the outside world and does so lazily""".stripMargin) {
+    it("""captures an IO Effect, something
+         |  that happens to the outside world and does so lazily""".stripMargin) {
       import cats.effect.IO
       def sayHelloWorldTwice(s: String): IO[Unit] = {
         IO[Unit](println(s)).flatMap(_ => IO[Unit](println(s)))
       }
       val container: IO[Unit] = sayHelloWorldTwice("Hello World")
-      println("No  thing has happened yet!")
-      container.unsafeRunSync()
+      println("Nothing has happened yet!")
+      container.asserting(u => u should be (()))
     }
 
     it("""can be rewritten using a flatMap for better clarity""".stripMargin) {
@@ -52,8 +53,9 @@ class IOSpec extends FunSpec with Matchers {
         } yield ()
       }
       val printHelloWorldTwice: IO[Unit] = printStringTwice("Hello World")
-      printHelloWorldTwice.unsafeRunSync()
+      printHelloWorldTwice.asserting(u => u should be (()))
     }
+
     it(
       """can be rewritten now using assignment since the invocation is lazy""".stripMargin
     ) {
@@ -66,11 +68,11 @@ class IOSpec extends FunSpec with Matchers {
         } yield ()
       }
       val container: IO[Unit] = sayHelloWorldTwice("Hello World")
-      container.unsafeRunSync()
+      container.asserting(u => u should be (()))
     }
+
     it("""can be used to program interaction of events""") {
       import cats.effect.IO
-
       def putStrLn(value: String) = IO(println(value))
       val readLn = IO(scala.io.StdIn.readLine())
 
@@ -80,7 +82,7 @@ class IOSpec extends FunSpec with Matchers {
         _ <- putStrLn(s"Hello, $n!")
       } yield ()
 
-      io.unsafeRunSync()
+      io.asserting(u => u should be (()))
     }
   }
 
@@ -96,61 +98,73 @@ class IOSpec extends FunSpec with Matchers {
 
   describe("Unit testing with the IO Monad") {
     it("""should be able to test as much as possible without leaving as
-             |  many lines untested like in Java""".stripMargin) {
-      type AssertResult = Either[Throwable, String] => Unit
+         |  many lines untested like in Java""".stripMargin) {
       val readLineFake = IO(3)
-      val f: AssertResult = {
-        case Left(t)  => t.getMessage should be("Unable to process")
-        case Right(v) => v should be("You will be 33 years old")
-      }
-      interact(readLineFake).unsafeRunAsync(f)
+      interact(readLineFake).asserting(_ should be("You will be 33 years old"))
     }
   }
 
   describe("IO.async") {
     it("""describes asynchronous processing, it also applies
-          |  the laws of async monad""".stripMargin) {
+         |  the laws of async monad""".stripMargin) {
 
       info("it takes a function of either to unit")
 
       def processElseWhere(i: Int): IO[Int] =
-        IO.async { cb =>
+        IO.async_ { cb =>
           if (i > 0) cb(Left(new Throwable("Not right")))
           else cb(Right(3))
+          ()
         }
 
-      val value1 = for { i <- processElseWhere(4) } yield (i + 5)
-      value1.unsafeRunAsync {
-        case Left(value)  => value shouldBe a[Throwable]
-        case Right(value) => value should be(3)
-      }
+      val value1 = for { i <- processElseWhere(-2) } yield (i + 5)
+      value1.asserting(i => i should be (8))
     }
   }
 
   describe("IO utilities") {
-    it("""IO can be composed with flatMap""") {
-      import scala.concurrent.duration._
-      val app = IO.apply("Right on")
-      val fork1: IO[Assertion] = app.map(s => assert(s == "Right on"))
-      val fork2: IO[Unit] = app.map(s => println(s))
-
-      val value1: IO[Assertion] = for {
-        x <- fork1
-        _ <- fork2
-      } yield (x)
-      val result = value1.unsafeRunTimed(3 seconds).getOrElse("None")
-      result
+    it("can be debugged?") {
+        val compose = for {
+            a <- IO("Awesome").debug("S1")
+            b <- IO("Cool").debug("S2")
+        } yield (Monoid[String].combine(a, b))
+        compose.asserting(s => s should be ("AwesomeCool"))
     }
 
-    it("has a timer") {
-      val ec =
-        ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(3))
-      val result = for {
-        _ <- IO.shift(ec)
-        x <- IO("Cool")
-        y <- IO("World")
-      } yield x + y
-      result.unsafeRunAsyncAndForget()
+//    it("""IO can be composed with flatMap""") {
+//      import scala.concurrent.duration._
+//      val app = IO.apply("Right on")
+//      val fork1: IO[Assertion] = app.map(s => assert(s == "Right on"))
+//      val fork2: IO[Unit] = app.map(s => println(s))
+//
+//      val value1: IO[Assertion] = for {
+//        x <- fork1
+//        _ <- fork2
+//      } yield x
+//      val result = value1.unsafeRunTimed(3 seconds).getOrElse("None")
+//      result
+//    }
+//
+//    it("has a timer") {
+//      val result = for {
+//        _ <- IO.shift(ec)
+//        x <- IO("Cool")
+//        y <- IO("World")
+//      } yield x + y
+//      result.unsafeRunAsyncAndForget()
+//    }
+
+    it("has operators *> which does one then the other") {
+      val io = IO("Foo") *> IO("Bar")
+      io.asserting(s => s should be("Bar"))
+    }
+
+    it("has operators &> which does one then the other in parallel") {
+      val result =
+        IO(Thread.currentThread().getName) &>
+          IO(Thread.currentThread().getName)
+      val value1 = result.delayBy(10 seconds)
+      value1.assertNoException
     }
   }
 }
