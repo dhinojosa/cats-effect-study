@@ -20,11 +20,13 @@ class SyncIOSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
     describe("Creation") {
       it("is similar to IO[_] but processes and blocks synchronously") {
         val result = SyncIO.apply {
+          println("In the SyncIO")
           Thread.sleep(3000)
           302
         }
         result.asserting(i => i should be(302))
       }
+
 
       it("can be converted to an AsyncIO") {
         val result: SyncIO[Int] = SyncIO.apply {
