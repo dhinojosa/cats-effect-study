@@ -1,12 +1,10 @@
-package com.xyzcorp.datatypes
+package com.xyzcorp.typeclasses
 
 import cats._
 import cats.effect.testing.scalatest.AsyncIOSpec
-import cats.effect.{Clock, IO, SyncIO}
+import cats.effect.{Clock, IO}
 import cats.implicits._
-import org.scalatest._
 import org.scalatest.funspec.AsyncFunSpec
-import org.scalatest.matchers.should
 import org.scalatest.matchers.should._
 
 class ClockSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {

@@ -3,12 +3,13 @@ package com.xyzcorp.datatypes
 import cats._
 import cats.implicits._
 import cats.effect._
-import org.scalatest.funspec.AnyFunSpec
+import cats.effect.testing.scalatest.AsyncIOSpec
+import org.scalatest.funspec.{AnyFunSpec, AsyncFunSpec}
 import org.scalatest.matchers.should.Matchers
 
 import java.io.FileInputStream
 
-class ResourceSpec extends AnyFunSpec with Matchers {
+class ResourceSpec  extends AsyncFunSpec with AsyncIOSpec with Matchers {
     describe("Resource allocates and releases a resource") {
         val resource: Resource[IO, FileInputStream] = {
             Resource.make(IO(new FileInputStream("somefile.txt")))(

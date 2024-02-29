@@ -10,7 +10,7 @@ import cats.implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IOAsyncSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
+class AsyncSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
   describe("Async extends Sync and LiftIO") {
     it("is generally used as a closure where the callback closes around the IO") {
       val apiCall = Future.successful("I come from the Future!")

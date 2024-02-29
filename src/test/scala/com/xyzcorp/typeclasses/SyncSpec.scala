@@ -6,7 +6,7 @@ import cats.effect.{Clock, IO, Sync, SyncIO}
 import org.scalatest.funspec.{AnyFunSpec, AsyncFunSpec}
 import org.scalatest.matchers.should.Matchers
 
-class SyncIOSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
+class SyncSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
   describe("""A Monad that can suspend the execution of
              |  side effects in the F[_] context.""".stripMargin) {
     val a: IO[Int] = Sync[IO].delay(14 + 10)
