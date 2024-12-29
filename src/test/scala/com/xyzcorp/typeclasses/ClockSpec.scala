@@ -21,6 +21,4 @@ class ClockSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
     result.asserting(t => t._1 should be(30))
     result.asserting(t => t._2.length should be > 200L)
   }
-
-
 }

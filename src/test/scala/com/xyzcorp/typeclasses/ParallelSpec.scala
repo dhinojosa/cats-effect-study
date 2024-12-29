@@ -10,7 +10,7 @@ import org.scalatest.matchers.should.Matchers
 class ParallelSpec extends AsyncFunSpec with AsyncIOSpec with Matchers{
    describe("Parallel type class is a Spec that perform parallelism") {
      it("can use the Par to perform parallel") {
-         val parallel = Parallel[IO]
+         val parallel = Parallel.apply[IO]
          val par1: Par[String] = parallel.parallel(IO(s"S1"))
          val par2: Par[String] = parallel.parallel(IO(s"S2"))
          val combine = Applicative[Par]
