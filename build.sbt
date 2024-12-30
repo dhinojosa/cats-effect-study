@@ -35,8 +35,8 @@ scalacOptions ++= Seq(
 fork := true
 
 libraryDependencies := Seq(
-  "org.scalatest" %% "scalatest" % "3.2.9" % "test",
-  "org.scalatest" %% "scalatest-funspec" % "3.2.9" % "test",
-  "org.typelevel" %% "cats-effect-testing-scalatest" % "1.3.0" % "test",
-  ("org.typelevel" %% "cats-effect" % "3.4.2").withSources().withJavadoc()
+  "org.scalatest" %% "scalatest" % "3.2.19" % "test",
+  "org.scalatest" %% "scalatest-funspec" % "3.2.19" % "test",
+  "org.typelevel" %% "cats-effect-testing-scalatest" % "1.6.0" % "test",
+  ("org.typelevel" %% "cats-effect" % "3.5.7").withSources().withJavadoc()
 )
