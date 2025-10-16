@@ -24,7 +24,7 @@ name := "cats-effect-study"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.13.6"
+scalaVersion := "3.3.7"
 
 scalacOptions ++= Seq(
   "-Xfatal-warnings",
@@ -35,8 +35,8 @@ scalacOptions ++= Seq(
 fork := true
 
 libraryDependencies := Seq(
-  "org.scalatest" %% "scalatest" % "3.2.19" % "test",
-  "org.scalatest" %% "scalatest-funspec" % "3.2.19" % "test",
-  "org.typelevel" %% "cats-effect-testing-scalatest" % "1.6.0" % "test",
-  ("org.typelevel" %% "cats-effect" % "3.5.7").withSources().withJavadoc()
+  "org.scalatest" %% "scalatest" % "3.3.0-alpha.2" % "test",
+  "org.scalatest" %% "scalatest-funspec" % "3.3.0-alpha.2" % "test",
+  "org.typelevel" %% "cats-effect-testing-scalatest" % "1.7.0" % "test",
+  ("org.typelevel" %% "cats-effect" % "3.7-4972921").withSources().withJavadoc()
 )
