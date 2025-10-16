@@ -1,24 +1,38 @@
 package com.xyzcorp.typeclasses
 
-import cats.effect.{IO, Spawn}
 import cats.effect.testing.scalatest.AsyncIOSpec
 import org.scalatest.funspec.AsyncFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class SpawnSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
+  import cats.effect.syntax.all._
+  import cats.effect.{MonadCancel, Spawn}
+  import cats.syntax.all._
 
-  describe("Spawn has multiple ways to spawn a fiber, which is analogous to a Virtual Thread in Java") {
-    describe("Concepts") {
-      describe("Spawn[F]#start: start and forget, no lifecycle management for the spawned fiber") {
-        Spawn[IO].start()
-      }
-      describe(
-        "Spawn[F]#background: ties the lifecycle of the spawned fiber to that of the fiber that invoked background"
-      ) {}
-    }
-    describe("Companions") {}
-    describe("Methods") {}
-    describe("Extensions") {}
+  trait Server[F[_]] {
+    def accept: F[Connection[F]]
   }
 
+  trait Connection[F[_]] {
+    def read: F[Array[Byte]]
+    def write(bytes: Array[Byte]): F[Unit]
+    def close: F[Unit]
+  }
+
+  def endpoint[F[_]: Spawn](server: Server[F])(body: Array[Byte] => F[Array[Byte]]): F[Unit] = {
+    def handle(conn: Connection[F]): F[Unit] =
+      for {
+        request <- conn.read
+        response <- body(request)
+        _ <- conn.write(response)
+      } yield ()
+
+    val handler = MonadCancel[F].uncancelable { poll =>
+      poll(server.accept).flatMap { conn =>
+        handle(conn).guarantee(conn.close).start
+      }
+    }
+
+    handler.foreverM
+  }
 }
