@@ -15,8 +15,8 @@ class FiberSpec extends AsyncFunSpec with AsyncIOSpec with Matchers  {
         val composed = for {
             fiberIO1 <- fiber1
             fiberIO2 <- fiber2
-            outcome1 <- fiberIO1.join.onError(_ => fiberIO1.cancel)
-            outcome2 <- fiberIO2.join.onError(_ => fiberIO2.cancel)
+            outcome1 <- fiberIO1.join.onError { case _ => fiberIO1.cancel }
+            outcome2 <- fiberIO2.join.onError { case _ => fiberIO2.cancel }
         } yield (outcome1, outcome2)
         info("Note that Outcome is not monadic")
         composed.asserting(o => o._1.isSuccess should be (true))

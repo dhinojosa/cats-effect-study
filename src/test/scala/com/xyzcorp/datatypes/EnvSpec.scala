@@ -1,11 +1,9 @@
 package com.xyzcorp.datatypes
 
-import cats._
-import cats.implicits._
 import cats.effect._
-import cats.effect.std
 import cats.effect.std.Env
 import cats.effect.testing.scalatest.AsyncIOSpec
+import cats.implicits._
 import org.scalatest.funspec.AsyncFunSpec
 import org.scalatest.matchers.should.Matchers
 

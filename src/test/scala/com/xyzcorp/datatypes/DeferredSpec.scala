@@ -28,7 +28,7 @@ class DeferredSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
         _ <- IO.println("Waiting some more")
         _ <- IO.println("And answer!")
         _ <- deferred.complete(100)
-        outcome <- fiber.join.onError(_ => fiber.cancel)
+        outcome <- fiber.join.onError { case _ => fiber.cancel }
         resolution <- outcome.embed(onCancel = IO(IO(-1)))
         result <- resolution
         _ <- IO.println(s"Answer is: $result")
