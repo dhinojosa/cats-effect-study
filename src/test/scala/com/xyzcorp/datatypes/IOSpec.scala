@@ -114,7 +114,7 @@ class IOSpec extends AsyncFunSpec with AsyncIOSpec with Matchers {
           IO(Option(IO(thread.interrupt())))
         }
 
-        asyncIO.assertThrowsError { e: RuntimeException =>
+        asyncIO.assertThrowsError { (e: RuntimeException) =>
           e.getMessage shouldBe "Something went wrong"
         }
       }
